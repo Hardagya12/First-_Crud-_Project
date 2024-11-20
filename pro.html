@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+        }
+        form {
+            width: 500px;
+            margin: 20px auto;
+            box-shadow: 0 0 10px 2px #ccc;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        form label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        form input {
+            width: 100%;
+            height: 30px;
+            margin-bottom: 15px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+        form button {
+            padding: 10px 25px;
+            background-color: green;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .items {
+            flex-basis: 23%;
+            padding: 1%;
+            box-shadow: 0 0 10px 2px #ccc;
+            margin: 10px auto;
+            position: relative;
+            max-width: 500px;
+        }
+        .items span {
+            position: absolute;
+            font-size: 30px;
+            cursor: pointer;
+            right: 10px;
+            top: 5px;
+        }
+        .items h5 {
+            margin-top: 10px;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+<body>
+    <form>
+        <h2>Enquiry Now</h2>
+        <label for="uname">Name</label>
+        <input type="text" id="uname" name="uname" required>
+
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="phone">Phone</label>
+        <input type="text" id="phone" name="phone" required>
+
+        <label for = "Password">Password</label>
+        <input type = "text" id = "Password" name = "Password" required>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <button id="clearAll">Clear All</button>
+
+    <div class="main"></div>
+
+    <script>
+        let form = document.querySelector("form");
+        let main = document.querySelector(".main");
+        let clearAll = document.querySelector("#clearAll");
+
+        form.addEventListener("submit", (event) => {
+            event.preventDefault(); // Prevent the form from submitting (refresh)
+            
+            let name = event.target.uname.value;
+            let email = event.target.email.value;
+            let phone = event.target.phone.value;
+            let password = event.target.Password.value;
+            let checkStatus = 0;
+
+            // Retrieve existing user data from localStorage, or initialize as an empty array
+            let userData = JSON.parse(localStorage.getItem("userDetails")) ?? [];
+
+            // Check if email or phone already exists
+            for (let v of userData) {
+                if (v.email === email || v.phone === phone) {
+                    checkStatus = 1;
+                    break;
+                }
+            }
+
+            if (checkStatus === 1) {
+                alert("Email or Phone number already exists");
+                return;
+            } else {
+                // Add new user data to the array
+                userData.push({ name, email, phone, password });
+                localStorage.setItem("userDetails", JSON.stringify(userData)); // Store updated data in localStorage
+                event.target.reset(); // Reset form fields
+                displayData(); // Refresh the displayed data
+            }
+        });
+
+        let displayData = () => {
+            let userData = JSON.parse(localStorage.getItem("userDetails")) ?? [];
+            let finalData = "";
+
+            // Loop through each user data entry and create corresponding HTML
+            userData.forEach((element, i) => {
+                finalData += `
+                    <div class="items">
+                        <span onclick="removeData(${i})">&times;</span>
+                        <h5>Name</h5>
+                        <p>Name: ${element.name}</p>
+
+                        <h5>Email</h5>
+                        <p>Email: ${element.email}</p>
+
+                        <h5>Phone</h5>
+                        <p>Phone: ${element.phone}</p>
+
+                        <h5>Password</h5>
+                        <p>Password: ${element.password}</p>
+                    </div>`;
+            });
+
+            main.innerHTML = finalData; // Update the main container with the new content
+        };
+
+        let removeData = (index) => {
+            let userData = JSON.parse(localStorage.getItem("userDetails"));
+            userData.splice(index, 1); // Remove the selected entry
+            localStorage.setItem("userDetails", JSON.stringify(userData)); // Update localStorage
+            displayData(); // Refresh the displayed data
+        };
+
+        clearAll.addEventListener("click", () => {
+            localStorage.clear(); // Clear all data from localStorage
+            displayData(); // Refresh the displayed data
+        });
+
+        // Display data on page load
+        displayData();
+    </script>
+</body>
+</html>
